@@ -64,12 +64,12 @@ def exportar_bloques_a_template(bloques, plantilla_path, carpeta_salida, ciudad)
 def procesar_archivo_medipiel(archivo_path, plantilla_path):
     xls = pd.ExcelFile(archivo_path)
     bodegas_dict = {
-        'Cali': 'Cali #1 - Barrio Obrero',
-        'Medellín': 'Medellin #2 - Sabaneta Mayorca',
-        'Barranqilla': 'Barranquilla #1 - Granadillo',
-        'Bogotá': 'Bogotá #2 - Montevideo'
+        'ME004': 'Cali #1 - Barrio Obrero',
+        'ME002': 'Medellin #2 - Sabaneta Mayorca',
+        'ME005': 'Barranquilla #1 - Granadillo',
+        'ME002': 'Bogotá #2 - Montevideo'
     }
-    hojas = {'Medellin', 'Bogota', 'Cali', 'Barranquilla'}
+    hojas = {'Sabaneta', 'Bogotá', 'Cali', 'Barranquilla'}
     hojas_normalizadas = {h.lower().strip(): h for h in xls.sheet_names}
     hojas_validas = [hojas_normalizadas[h.lower()] for h in hojas if h.lower() in hojas_normalizadas]
 
@@ -80,10 +80,10 @@ def procesar_archivo_medipiel(archivo_path, plantilla_path):
         for hoja in hojas_validas:
             df = pd.read_excel(xls, sheet_name=hoja)
             col_orden_externa = [c for c in df.columns if 'orden externa' in c.lower()][0]
-            col_destinatario  = [c for c in df.columns if 'tienda destino' in c.lower()][0]
-            col_bodega        = [c for c in df.columns if 'bod' in c.lower()][0]
+            col_destinatario = [c for c in df.columns if 'tienda' in c.lower() or 'Desc. bod. entrada' in c.lower()]
+            col_bodega = [c for c in df.columns if 'bod. salida' in c.lower() or 'salida' in c.lower()]
             col_cantidad      = [c for c in df.columns if 'cant' in c.lower()][0]
-            col_sku           = [c for c in df.columns if 'sku' in c.lower()][0]
+            col_sku           = [c for c in df.columns if 'Codigo' in c.lower()][0]
 
             df['numero_externo'] = df[col_orden_externa].astype(str).str.strip()
             df['destinatario']   = df[col_destinatario].astype(str).str.strip()
