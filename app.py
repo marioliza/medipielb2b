@@ -30,7 +30,7 @@ def empaquetar_ordenes_optimo(df_agrupado, max_filas=100):
 
 def exportar_bloques_a_template(bloques, plantilla_path, carpeta_salida, ciudad):
     fecha_str = datetime.now().strftime('%Y-%m-%d')
-    ciudad_code = ciudad[:3].upper().replace(" ", "")
+    ciudad_code = ciudad[6:9].upper().replace(" ", "")
     archivos_generados = []
 
     for archivo_id, bloque in bloques:
@@ -54,6 +54,7 @@ def exportar_bloques_a_template(bloques, plantilla_path, carpeta_salida, ciudad)
             ws[f"{column_map['SKU o Código Melonn del producto']}{fila_excel}"] = row['sku']
             ws[f"{column_map['Cantidad']}{fila_excel}"] = row['cantidad']
 
+
         nombre_archivo = f"template_{fecha_str}_{ciudad_code}_{str(archivo_id).zfill(3)}.xlsx"
         output_path = os.path.join(carpeta_salida, nombre_archivo)
         wb.save(output_path)
@@ -67,10 +68,11 @@ def procesar_archivo_medipiel(archivo_path, plantilla_path):
         'ME004': 'Cali #1 - Barrio Obrero',
         'ME002': 'Medellin #2 - Sabaneta Mayorca',
         'ME005': 'Barranquilla #1 - Granadillo',
-        'ME002': 'Bogotá #2 - Montevideo'
+        'ME003': 'Bogotá #2 - Montevideo'
     }
-    hojas = {'Sabaneta', 'Bogotá', 'Cali', 'Barranquilla'}
+    hojas = {'Melon Sabaneta', 'Melon Bogotá', 'Melon Cali', 'melon Barranquilla'}
     hojas_normalizadas = {h.lower().strip(): h for h in xls.sheet_names}
+    print(hojas_normalizadas)
     hojas_validas = [hojas_normalizadas[h.lower()] for h in hojas if h.lower() in hojas_normalizadas]
 
     resumen_global = []
@@ -79,11 +81,12 @@ def procesar_archivo_medipiel(archivo_path, plantilla_path):
     with tempfile.TemporaryDirectory() as carpeta_salida:
         for hoja in hojas_validas:
             df = pd.read_excel(xls, sheet_name=hoja)
+            print(df.columns)
             col_orden_externa = [c for c in df.columns if 'orden externa' in c.lower()][0]
-            col_destinatario = [c for c in df.columns if 'tienda' in c.lower() or 'Desc. bod. entrada' in c.lower()]
-            col_bodega = [c for c in df.columns if 'bod. salida' in c.lower() or 'salida' in c.lower()]
+            col_destinatario = [c for c in df.columns if 'tienda' in c.lower() or 'desc.' in c.lower()][0]
+            col_bodega = [c for c in df.columns if 'bod. salida' in c.lower() or 'salida' in c.lower()][0]
             col_cantidad      = [c for c in df.columns if 'cant' in c.lower()][0]
-            col_sku           = [c for c in df.columns if 'Codigo' in c.lower()][0]
+            col_sku           = [c for c in df.columns if 'codigo' in c.lower()][0]
 
             df['numero_externo'] = df[col_orden_externa].astype(str).str.strip()
             df['destinatario']   = df[col_destinatario].astype(str).str.strip()
@@ -101,6 +104,7 @@ def procesar_archivo_medipiel(archivo_path, plantilla_path):
             archivos = exportar_bloques_a_template(bloques, plantilla_path, carpeta_salida, hoja)
             archivos_exportados.extend(archivos)
 
+        #resumen_final = pd.DataFrame()
         # Resumen
         if resumen_global:
             df_resumen = pd.concat(resumen_global, ignore_index=True)
