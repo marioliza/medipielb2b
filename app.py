@@ -158,7 +158,7 @@ def procesar_archivo_medipiel(archivo_path, plantilla_path):
 
 # ==== Streamlit UI ====
 st.set_page_config(page_title="Generador de archivos Medipiel", layout="wide")
-st.image("logo_medipiel.png", width=200)
+#st.image("logo_medipiel.png", width=200)
 st.title("🧾 Generador de archivos Medipiel")
 
 archivo_medipiel = st.file_uploader("📥 Sube el archivo de Medipiel (.xlsx):", type="xlsx")
