@@ -84,9 +84,10 @@ def procesar_archivo_medipiel(archivo_path, plantilla_path):
             print(df.columns)
             col_orden_externa = [c for c in df.columns if 'orden externa' in c.lower()][0]
             col_destinatario = [c for c in df.columns if 'tienda' in c.lower() or 'desc.' in c.lower()][0]
-            col_bodega = [c for c in df.columns if 'bod. salida' in c.lower() or 'salida' in c.lower()][0]
+            col_bodega =        [c for c in df.columns if 'bod. salida' in c.lower() or 'salida' in c.lower()][0]
             col_cantidad      = [c for c in df.columns if 'cant' in c.lower()][0]
             col_sku           = [c for c in df.columns if 'codigo' in c.lower()][0]
+            col_ceco =          [c for c in df.columns if 'bod.' in c.lower() or 'entrada' in c.lower()][0]
 
             df['numero_externo'] = df[col_orden_externa].astype(str).str.strip()
             df['destinatario']   = df[col_destinatario].astype(str).str.strip()
@@ -94,19 +95,21 @@ def procesar_archivo_medipiel(archivo_path, plantilla_path):
             df['cantidad']       = df[col_cantidad]
             df['sku']            = df[col_sku].astype(str).str.strip()
             df['nombre_bodega']  = df['bodega'].map(bodegas_dict)
+            df['entrada'] =        df[col_ceco].astype(str).str.strip()
 
 
             #------------
             # === HOMOLOGACIÓN de destinatario =============================================
             homologos_df = pd.read_excel('Homologos.xlsx')
-            homologos_df['destinatario_origen_norm'] = homologos_df['Nombre de la tienda'].str.upper().str.strip()
+            homologos_df['Ceco'] = homologos_df['Ceco'].astype(str)
+            homologos_df['destinatario_origen_norm'] = homologos_df['Ceco'].str.strip()
 
             map_dest = dict(zip(
                 homologos_df['destinatario_origen_norm'],
                 homologos_df['Homologo Melonn / Destinatario'].str.strip()
             ))
 
-            df['destinatario_norm'] = df['destinatario'].str.upper().str.strip()
+            df['destinatario_norm'] = df['entrada'].str.strip().str[2:]
             df['destinatario_homologado'] = df['destinatario_norm'].map(map_dest).fillna(df['destinatario'])
 
             # ⚠️ VALIDACIÓN OPCIONAL: mostrar los no homologados
