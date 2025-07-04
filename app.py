@@ -87,7 +87,7 @@ def procesar_archivo_medipiel(archivo_path, plantilla_path):
             col_bodega =        [c for c in df.columns if 'bod. salida' in c.lower() or 'salida' in c.lower()][0]
             col_cantidad      = [c for c in df.columns if 'cant' in c.lower()][0]
             col_sku           = [c for c in df.columns if 'codigo' in c.lower()][0]
-            col_ceco =          [c for c in df.columns if 'bod.' in c.lower() or 'entrada' in c.lower()][0]
+            col_ceco =          [c for c in df.columns if 'bod. entrada' in c.lower() or 'entrada' in c.lower()][0]
 
             df['numero_externo'] = df[col_orden_externa].astype(str).str.strip()
             df['destinatario']   = df[col_destinatario].astype(str).str.strip()
