@@ -64,7 +64,6 @@ def exportar_bloques_a_template(bloques, plantilla_path, carpeta_salida, ciudad)
 
 def procesar_archivo_medipiel(archivo_path, plantilla_path):
     xls = pd.ExcelFile(archivo_path)
-
     bodegas_dict = {
         'ME004': 'Cali #1 - Barrio Obrero',
         'ME002': 'Medellin #2 - Sabaneta Mayorca',
@@ -158,11 +157,10 @@ def procesar_archivo_medipiel(archivo_path, plantilla_path):
 
 # ==== Streamlit UI ====
 st.set_page_config(page_title="Generador de archivos Medipiel", layout="wide")
-#st.image("logo_medipiel.png", width=200)
 st.title("🧾 Generador de archivos Medipiel")
 
 archivo_medipiel = st.file_uploader("📥 Sube el archivo de Medipiel (.xlsx):", type="xlsx")
-plantilla_path = "template.xlsx" # ✅ Cargada desde tu directorio
+plantilla_path = "template.xlsx"  # ✅ Cargada desde tu directorio
 
 if archivo_medipiel:
     if st.button("🚀 Procesar archivo"):
