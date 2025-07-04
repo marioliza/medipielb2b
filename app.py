@@ -64,6 +64,7 @@ def exportar_bloques_a_template(bloques, plantilla_path, carpeta_salida, ciudad)
 
 def procesar_archivo_medipiel(archivo_path, plantilla_path):
     xls = pd.ExcelFile(archivo_path)
+
     bodegas_dict = {
         'ME004': 'Cali #1 - Barrio Obrero',
         'ME002': 'Medellin #2 - Sabaneta Mayorca',
@@ -94,6 +95,36 @@ def procesar_archivo_medipiel(archivo_path, plantilla_path):
             df['cantidad']       = df[col_cantidad]
             df['sku']            = df[col_sku].astype(str).str.strip()
             df['nombre_bodega']  = df['bodega'].map(bodegas_dict)
+
+
+            #------------
+            # === HOMOLOGACIÓN de destinatario =============================================
+            homologos_df = pd.read_excel('Homologos.xlsx')
+            homologos_df['destinatario_origen_norm'] = homologos_df['Nombre de la tienda'].str.upper().str.strip()
+
+            map_dest = dict(zip(
+                homologos_df['destinatario_origen_norm'],
+                homologos_df['Homologo Melonn / Destinatario'].str.strip()
+            ))
+
+            df['destinatario_norm'] = df['destinatario'].str.upper().str.strip()
+            df['destinatario_homologado'] = df['destinatario_norm'].map(map_dest).fillna(df['destinatario'])
+
+            # ⚠️ VALIDACIÓN OPCIONAL: mostrar los no homologados
+            no_homologados = df[df['destinatario_norm'].isin(
+                set(df['destinatario_norm']) - set(map_dest.keys())
+            )]
+
+            if not no_homologados.empty:
+                st.warning(f"⚠️ {no_homologados['destinatario'].nunique()} destinatarios no tienen homologación.")
+                st.dataframe(no_homologados[['destinatario']].drop_duplicates())
+
+            # Reasignación final
+            df['destinatario'] = df['destinatario_homologado']
+            df.drop(columns=['destinatario_norm', 'destinatario_homologado'], inplace=True)
+
+            # === FIN HOMOLOGACIÓN =================================================================
+            #-----------
 
             agrupado = df.groupby(['numero_externo', 'sku', 'bodega', 'nombre_bodega', 'destinatario'], as_index=False)['cantidad'].sum()
             bloques = empaquetar_ordenes_optimo(agrupado)
@@ -127,10 +158,11 @@ def procesar_archivo_medipiel(archivo_path, plantilla_path):
 
 # ==== Streamlit UI ====
 st.set_page_config(page_title="Generador de archivos Medipiel", layout="wide")
+st.image("logo_medipiel.png", width=200)
 st.title("🧾 Generador de archivos Medipiel")
 
 archivo_medipiel = st.file_uploader("📥 Sube el archivo de Medipiel (.xlsx):", type="xlsx")
-plantilla_path = "template.xlsx"  # ✅ Cargada desde tu directorio
+plantilla_path = "template.xlsx" # ✅ Cargada desde tu directorio
 
 if archivo_medipiel:
     if st.button("🚀 Procesar archivo"):
