@@ -47,8 +47,8 @@ def exportar_bloques_a_template(bloques, plantilla_path, carpeta_salida, ciudad)
             fila_excel = i + 3
             ws[f"{column_map['Número de orden externo']}{fila_excel}"] = row['numero_externo']
             ws[f"{column_map['CEDIS de origen']}{fila_excel}"] = row['nombre_bodega']
-            ws[f"{column_map['Destinatario']}{fila_excel}"] = "Medipiel"
-            ws[f"{column_map['Nombre punto de entrega']}{fila_excel}"] = row['destinatario']
+            ws[f"{column_map['Destinatario']}{fila_excel}"] = row['destinatario']
+            ws[f"{column_map['Nombre punto de entrega']}{fila_excel}"] = row['pdv']
             ws[f"{column_map['Alistamiento']}{fila_excel}"] = "Reservar ahora y alistar después"
             ws[f"{column_map['Método de envío']}{fila_excel}"] = "Estándar B2B (Local y Nacional) *"
             ws[f"{column_map['SKU o Código Melonn del producto']}{fila_excel}"] = row['sku']
@@ -65,7 +65,7 @@ def exportar_bloques_a_template(bloques, plantilla_path, carpeta_salida, ciudad)
 def procesar_archivo_medipiel(archivo_path, plantilla_path):
     xls = pd.ExcelFile(archivo_path)
     bodegas_dict = {
-        'ME004': 'Cali #1 - Barrio Obrero',
+        'ME004': 'Cali #2 - Cámbulos', #--------------------------------------------------------
         'ME002': 'Medellin #2 - Sabaneta Mayorca',
         'ME005': 'Barranquilla #1 - Granadillo',
         'ME003': 'Bogotá #2 - Montevideo'
@@ -109,8 +109,14 @@ def procesar_archivo_medipiel(archivo_path, plantilla_path):
                 homologos_df['Homologo Melonn / Destinatario'].str.strip()
             ))
 
+            pdv = dict(zip(
+                homologos_df['destinatario_origen_norm'],
+                homologos_df['PDV'].str.strip()
+            ))
+
             df['destinatario_norm'] = df['entrada'].str.strip().str[2:]
             df['destinatario_homologado'] = df['destinatario_norm'].map(map_dest).fillna(df['destinatario'])
+            df['pdv'] = df['destinatario_norm'].map(pdv).fillna(df['destinatario'])
 
             # ⚠️ VALIDACIÓN OPCIONAL: mostrar los no homologados
             no_homologados = df[df['destinatario_norm'].isin(
