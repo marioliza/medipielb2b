@@ -134,7 +134,7 @@ def procesar_archivo_medipiel(archivo_path, plantilla_path):
             # === FIN HOMOLOGACIÓN =================================================================
             #-----------
 
-            agrupado = df.groupby(['numero_externo', 'sku', 'bodega', 'nombre_bodega', 'destinatario'], as_index=False)['cantidad'].sum()
+            agrupado = df.groupby(['numero_externo', 'sku', 'bodega', 'nombre_bodega', 'destinatario','pdv'], as_index=False)['cantidad'].sum()
             bloques = empaquetar_ordenes_optimo(agrupado)
 
             for _, bloque in bloques:
