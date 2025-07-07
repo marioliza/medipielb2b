@@ -100,7 +100,7 @@ def procesar_archivo_medipiel(archivo_path, plantilla_path):
 
             #------------
             # === HOMOLOGACIÓN de destinatario =============================================
-            homologos_df = pd.read_excel('Homologos.xlsx')
+            homologos_df = pd.read_excel('Homologos_.xlsx')
             homologos_df['Ceco'] = homologos_df['Ceco'].astype(str)
             homologos_df['destinatario_origen_norm'] = homologos_df['Ceco'].str.strip()
 
